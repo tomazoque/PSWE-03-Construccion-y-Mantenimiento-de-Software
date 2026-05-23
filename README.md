@@ -22,3 +22,9 @@ Requisitos minimos:
 - Usar nombres claros.
 - Permitir pruebas unitarias.
 - Mantener las mismas reglas de negocio.
+
+### Practica 2 - Investigacion de ecosistemas de construccion de software
+
+La practica consiste en investigar ecosistemas de construccion de software y analizar su alcance, utilidad, limites y aplicacion.
+
+Se estudiaran herramientas relacionadas con desarrollo Python moderno, calidad de codigo, CI/CD, seguridad y mantenimiento, empaquetado, entornos, documentacion tecnica y un flujo DevSecOps minimo.

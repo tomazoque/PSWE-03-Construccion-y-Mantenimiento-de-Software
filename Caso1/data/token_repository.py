@@ -1,34 +1,7 @@
 from __future__ import annotations
 
 from config import DatabaseConfig
-from database import get_connection
-
-
-class UserRepository:
-    def __init__(self, db_config: DatabaseConfig):
-        self.db_config = db_config
-
-    def find_by_email(self, email: str):
-        sql = """
-        SELECT id_usuario, email, clave_hash, clave_salt, nombre, celular, activo
-        FROM dbo.Usuario
-        WHERE email = ?
-        """
-        with get_connection(self.db_config) as cn:
-            cursor = cn.cursor()
-            cursor.execute(sql, email)
-            return cursor.fetchone()
-
-    def update_password(self, user_id: int, password_hash: bytes, salt: bytes) -> None:
-        sql = """
-        UPDATE dbo.Usuario
-        SET clave_hash = ?, clave_salt = ?
-        WHERE id_usuario = ?
-        """
-        with get_connection(self.db_config) as cn:
-            cursor = cn.cursor()
-            cursor.execute(sql, password_hash, salt, user_id)
-            cn.commit()
+from data.database import get_connection
 
 
 class TokenRepository:
@@ -56,7 +29,6 @@ class TokenRepository:
           AND fecha_expira >= SYSDATETIME()
         ORDER BY fecha_creacion DESC
         """
-
         sql_update = """
         UPDATE dbo.Token2FA
         SET usado = 1

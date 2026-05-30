@@ -98,7 +98,7 @@ El estudiante debe reportar:
 
 | Métrica | Resultado |
 |---|---|
-| Cantidad de pantallas |  |
+| Cantidad de pantallas | 5 (login, 2FA, recuperar clave, cambiar clave, menú) |
 | Cantidad de funciones |  |
 | Cantidad de validaciones |  |
 | Cantidad de tablas |  |

@@ -1,21 +1,23 @@
 /*
-BD de demostración para curso:
-Construcción y Mantenimiento de Software
+BD de demostracion para curso:
+Construccion y Mantenimiento de Software
 
 Usuario demo:
 email: demo@fvncr.org
 clave: demo
 
 IMPORTANTE:
-Para contraseñas se usa HASH + SALT, no encriptación reversible.
+Para claves se usa HASH + SALT, no encriptacion reversible.
 */
 
-CREATE DATABASE CMSoftwareDemo;
+IF DB_ID('CMSoftwareDemo') IS NULL
+    CREATE DATABASE CMSoftwareDemo;
 GO
 
 USE CMSoftwareDemo;
 GO
 
+IF OBJECT_ID('dbo.AuditoriaLogin', 'U') IS NOT NULL DROP TABLE dbo.AuditoriaLogin;
 IF OBJECT_ID('dbo.Token2FA', 'U') IS NOT NULL DROP TABLE dbo.Token2FA;
 IF OBJECT_ID('dbo.Usuario', 'U') IS NOT NULL DROP TABLE dbo.Usuario;
 GO
@@ -49,8 +51,32 @@ CREATE TABLE dbo.Token2FA
 );
 GO
 
+CREATE TABLE dbo.AuditoriaLogin
+(
+    id_auditoria     INT IDENTITY(1,1) PRIMARY KEY,
+    id_usuario       INT NULL,
+    email            NVARCHAR(120) NULL,
+    evento           NVARCHAR(40) NOT NULL,
+    resultado        NVARCHAR(20) NOT NULL,
+    mensaje          NVARCHAR(250) NULL,
+    fecha_evento     DATETIME2(0) NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT FK_AuditoriaLogin_Usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES dbo.Usuario(id_usuario)
+);
+GO
+
 CREATE INDEX IX_Token2FA_Usuario_Tipo
 ON dbo.Token2FA(id_usuario, tipo, usado, fecha_expira);
+GO
+
+CREATE INDEX IX_AuditoriaLogin_Email_Fecha
+ON dbo.AuditoriaLogin(email, fecha_evento DESC);
+GO
+
+CREATE INDEX IX_AuditoriaLogin_Usuario_Fecha
+ON dbo.AuditoriaLogin(id_usuario, fecha_evento DESC);
 GO
 
 INSERT INTO dbo.Usuario(email, clave_hash, clave_salt, nombre, celular)
@@ -64,7 +90,7 @@ VALUES
 );
 GO
 
-SELECT 
+SELECT
     id_usuario,
     email,
     nombre,

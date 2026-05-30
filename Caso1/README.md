@@ -3,15 +3,22 @@
 ## Archivos
 
 - `schema.sql`: crea la base de datos, tablas y usuario demo.
-- `app.py`: aplicación Tkinter.
-- `guia_revision.md`: guía de revisión para estudiantes.
+- `app.py`: punto de entrada de la aplicacion.
+- `config.py`: configuracion por variables de ambiente.
+- `database.py`: conexion a SQL Server y errores de base de datos.
+- `models.py`: modelos de datos usados por la aplicacion.
+- `repositories.py`: acceso a datos y consultas SQL.
+- `services.py`: autenticacion, tokens, hash de clave y envio de email.
+- `validators.py`: validaciones de email, clave, token y formularios.
+- `ui.py`: interfaz grafica Tkinter.
+- `guia_revision.md`: guia de revision para estudiantes.
 
 ## Usuario demo
 
 - Email: `demo@fvncr.org`
 - Clave: `demo`
 
-## Instalación
+## Instalacion
 
 ```bash
 pip install pyodbc
@@ -19,15 +26,28 @@ pip install pyodbc
 
 Debe tener instalado el driver ODBC de SQL Server.
 
-## Ejecución
+## Ejecucion
 
 1. Ejecutar `schema.sql` en SQL Server Management Studio.
-2. Ajustar en `app.py` el servidor SQL si no es `localhost`.
+2. Configurar variables de ambiente si el servidor SQL no es `localhost`.
 3. Ejecutar:
 
 ```bash
 python app.py
 ```
+
+## Variables de ambiente
+
+```bash
+DB_SERVER=localhost
+DB_NAME=CMSoftwareDemo
+DB_DRIVER=ODBC Driver 17 for SQL Server
+DB_USER=usuario_sql_opcional
+DB_PASSWORD=clave_sql_opcional
+TOKEN_EXPIRATION_MINUTES=5
+```
+
+Si no se configuran `DB_USER` y `DB_PASSWORD`, se usa autenticacion integrada de Windows.
 
 ## Email
 

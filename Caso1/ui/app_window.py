@@ -151,6 +151,37 @@ class App(tk.Tk):
             "Secondary.TButton",
             background=[("active", "#e1eaf5"), ("pressed", "#d5e2f0")],
         )
+        style.configure(
+            "Form.TCheckbutton",
+            background=self.COLOR_CARD,
+            foreground=self.COLOR_MUTED,
+            font=self.FONT_BASE,
+            focuscolor=self.COLOR_CARD,
+        )
+        style.map(
+            "Form.TCheckbutton",
+            background=[
+                ("active", self.COLOR_CARD),
+                ("pressed", self.COLOR_CARD),
+                ("selected", self.COLOR_CARD),
+            ],
+            foreground=[("active", self.COLOR_TEXT)],
+        )
+        style.configure(
+            "Treeview",
+            background="#ffffff",
+            fieldbackground="#ffffff",
+            foreground=self.COLOR_TEXT,
+            rowheight=28,
+            bordercolor=self.COLOR_BORDER,
+            font=("Segoe UI", 9),
+        )
+        style.configure(
+            "Treeview.Heading",
+            background=self.COLOR_SECONDARY,
+            foreground=self.COLOR_PRIMARY,
+            font=("Segoe UI", 9, "bold"),
+        )
 
     def _center_window(self) -> None:
         self.update_idletasks()
@@ -245,6 +276,7 @@ class App(tk.Tk):
             text="Mostrar clave",
             variable=show_password,
             command=toggle,
+            style="Form.TCheckbutton",
         )
         check.grid(row=row, column=0, sticky="w", pady=(0, bottom_padding))
         return show_password
@@ -277,18 +309,18 @@ class App(tk.Tk):
             action()
         except DATABASE_ERRORS:
             logging.exception("Error de base de datos")
-            self.show_error("No fue posible completar la operacion. Intente nuevamente mas tarde.")
+            self.show_error("No fue posible completar la operación. Intente nuevamente más tarde.")
         except smtplib.SMTPException:
             logging.exception("Error enviando correo")
-            self.show_error("No fue posible enviar el correo en este momento. Intente nuevamente mas tarde.")
+            self.show_error("No fue posible enviar el correo en este momento. Intente nuevamente más tarde.")
         except Exception:
             logging.exception("Error no controlado")
-            self.show_error("Ocurrio un error inesperado. Intente nuevamente.")
+            self.show_error("Ocurrió un error inesperado. Intente nuevamente.")
 
     def show_error(self, message: str, back_action: Callable[[], None] | None = None) -> None:
         card = self._screen(
-            "No fue posible completar la operacion",
-            "Revise la informacion ingresada o vuelva a intentarlo.",
+            "No fue posible completar la operación",
+            "Revise la información ingresada o vuelva a intentarlo.",
             card_width=540,
         )
         form = self._form(card)
@@ -316,7 +348,7 @@ class App(tk.Tk):
 
     def show_login(self) -> None:
         self.current_user = None
-        card = self._screen("SecureAccess", "Inicio de sesion seguro", card_width=500)
+        card = self._screen("SecureAccess", "Inicio de sesión seguro", card_width=500)
         form = self._form(card)
 
         entry_email = self._field(form, "Email", 0)
@@ -348,13 +380,13 @@ class App(tk.Tk):
         actions = self._actions(form, 6)
         ttk.Button(
             actions,
-            text="Iniciar sesion",
+            text="Iniciar sesión",
             style="Primary.TButton",
             command=lambda: self.run_action(login),
         ).grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 8))
         ttk.Button(
             actions,
-            text="Olvido su clave?",
+            text="¿Olvidó su clave?",
             style="Secondary.TButton",
             command=self.show_password_recovery,
         ).grid(row=1, column=0, sticky="ew", padx=(0, 6))
@@ -419,13 +451,13 @@ class App(tk.Tk):
 
     def show_2fa(self) -> None:
         card = self._screen(
-            "Verificacion en dos pasos",
-            "Se envio un codigo al correo registrado. Ingreselo para completar el acceso.",
+            "Verificación en dos pasos",
+            "Se envió un código al correo registrado. Ingréselo para completar el acceso.",
             card_width=520,
         )
         form = self._form(card)
 
-        entry_token = self._field(form, "Codigo de verificacion", 0, width=18, validate_digits=True)
+        entry_token = self._field(form, "Código de verificación", 0, width=18, validate_digits=True)
         message, label = self._message_label(form, 2)
 
         def verify() -> None:
@@ -436,23 +468,25 @@ class App(tk.Tk):
                 message.set("Debe digitar el token.")
                 return
             if not token_valido(token):
-                message.set("El token debe tener 6 digitos.")
+                message.set("El token debe tener 6 dígitos.")
                 return
             if self.current_user is None:
-                self.show_error("La sesion expiro. Inicie sesion nuevamente.", self.show_login)
+                self.show_error("La sesión expiró. Inicie sesión nuevamente.", self.show_login)
                 return
 
             if self.auth_service.verify_login_token(self.current_user, token):
                 label.configure(style="Success.TLabel")
-                message.set("Codigo verificado correctamente.")
+                message.set("Código verificado correctamente.")
                 self.after(350, self.show_menu)
             else:
-                self.show_error("Token invalido, expirado o ya utilizado.", self.show_2fa)
+                self.show_error("Token inválido, expirado o ya utilizado.", self.show_2fa)
+
+        self.bind("<Return>", lambda _event: self.run_action(verify))
 
         actions = self._actions(form, 3)
         ttk.Button(
             actions,
-            text="Verificar codigo",
+            text="Verificar código",
             style="Primary.TButton",
             command=lambda: self.run_action(verify),
         ).grid(row=0, column=0, sticky="ew", padx=(0, 6))
@@ -467,8 +501,8 @@ class App(tk.Tk):
 
     def show_password_recovery(self) -> None:
         card = self._screen(
-            "Recuperar contrasena",
-            "Ingrese el email registrado. Si corresponde, recibira un codigo para crear una nueva clave.",
+            "Recuperar contraseña",
+            "Ingrese el email registrado. Si corresponde, recibirá un código para crear una nueva clave.",
             card_width=520,
         )
         form = self._form(card)
@@ -486,7 +520,7 @@ class App(tk.Tk):
 
             user_id = self.auth_service.request_password_recovery(email)
             if user_id is None:
-                self.show_error("No fue posible iniciar la recuperacion con el email ingresado.", self.show_password_recovery)
+                self.show_error("No fue posible iniciar la recuperación con el email ingresado.", self.show_password_recovery)
                 return
 
             self.show_change_password(user_id)
@@ -494,7 +528,7 @@ class App(tk.Tk):
         actions = self._actions(form, 3)
         ttk.Button(
             actions,
-            text="Enviar codigo de recuperacion",
+            text="Enviar código de recuperación",
             style="Primary.TButton",
             command=lambda: self.run_action(send_recovery_token),
         ).grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 8))
@@ -509,8 +543,8 @@ class App(tk.Tk):
 
     def show_change_password(self, user_id: int) -> None:
         card = self._screen(
-            "Crear nueva contrasena",
-            "Use el codigo recibido y defina una clave con letras, numeros y el caracter #.",
+            "Crear nueva contraseña",
+            "Use el código recibido y defina una clave con letras, números y el carácter #.",
             card_width=540,
         )
         form = self._form(card)
@@ -521,7 +555,7 @@ class App(tk.Tk):
         self._password_toggle(form, [entry_password, entry_confirm], 6)
         ttk.Label(
             form,
-            text="Restriccion: solo letras, numeros y #.",
+            text="Restricción: solo letras, números y #.",
             style="Muted.TLabel",
         ).grid(row=7, column=0, sticky="w", pady=(0, 10))
         message, _label = self._message_label(form, 8)
@@ -539,11 +573,11 @@ class App(tk.Tk):
                 message.set("Debe confirmar la nueva clave.")
                 return
             if new_password != confirm_password:
-                message.set("La confirmacion de clave no coincide.")
+                message.set("La confirmación de clave no coincide.")
                 return
 
             if not self.auth_service.change_password(user_id, token, new_password):
-                self.show_error("Token invalido, expirado o ya utilizado.", lambda: self.show_change_password(user_id))
+                self.show_error("Token inválido, expirado o ya utilizado.", lambda: self.show_change_password(user_id))
                 return
 
             self._show_info("Clave actualizada", "La clave fue actualizada correctamente.")
@@ -552,7 +586,7 @@ class App(tk.Tk):
         actions = self._actions(form, 9)
         ttk.Button(
             actions,
-            text="Actualizar contrasena",
+            text="Actualizar contraseña",
             style="Primary.TButton",
             command=lambda: self.run_action(change),
         ).grid(row=0, column=0, sticky="ew", padx=(0, 6))
@@ -571,7 +605,7 @@ class App(tk.Tk):
 
         card = self._screen(
             "SecureAccess",
-            "Acceso confirmado al sistema de autenticacion segura.",
+            "Acceso confirmado al sistema de autenticación segura.",
             card_width=560,
         )
         form = self._form(card)
@@ -595,7 +629,7 @@ class App(tk.Tk):
         )
         ttk.Label(
             panel,
-            text="La identidad fue validada mediante credenciales y verificacion en dos pasos.",
+            text="La identidad fue validada mediante credenciales y verificación en dos pasos.",
             style="Body.TLabel",
             wraplength=450,
             justify="left",
@@ -603,10 +637,18 @@ class App(tk.Tk):
 
         menu_options = (
             ("Inicio", "Pantalla de inicio"),
-            ("Opcion 1", "Funcionalidad en construccion"),
-            ("Opcion 2", "Funcionalidad en construccion"),
-            ("Opcion 3", "Funcionalidad en construccion"),
+            ("Opción 1", "Funcionalidad en construcción"),
+            ("Opción 2", "Funcionalidad en construcción"),
+            ("Opción 3", "Funcionalidad en construcción"),
         )
+
+        def open_menu_option(title: str, message: str) -> None:
+            if self.current_user is None:
+                self.show_error("La sesión expiró. Inicie sesión nuevamente.", self.show_login)
+                return
+
+            self.auth_service.record_menu_access(self.current_user, title)
+            messagebox.showinfo(title, message, parent=self)
 
         options = ttk.Frame(form, style="Form.TFrame")
         options.grid(row=3, column=0, sticky="ew", pady=(0, 18))
@@ -618,7 +660,7 @@ class App(tk.Tk):
                 options,
                 text=title,
                 style="Secondary.TButton",
-                command=lambda t=title, m=message: messagebox.showinfo(t, m, parent=self),
+                command=lambda t=title, m=message: self.run_action(lambda: open_menu_option(t, m)),
             ).grid(
                 row=index // 2,
                 column=index % 2,
@@ -629,7 +671,104 @@ class App(tk.Tk):
 
         ttk.Button(
             form,
-            text="Cerrar sesion",
+            text="Mi historial de accesos",
+            style="Secondary.TButton",
+            command=self.show_access_history,
+        ).grid(row=4, column=0, sticky="ew", pady=(0, 10))
+
+        ttk.Button(
+            form,
+            text="Cerrar sesión",
             style="Primary.TButton",
             command=self.show_login,
-        ).grid(row=4, column=0, sticky="ew")
+        ).grid(row=5, column=0, sticky="ew")
+
+    def show_access_history(self) -> None:
+        if self.current_user is None:
+            self.show_error("La sesión expiró. Inicie sesión nuevamente.", self.show_login)
+            return
+
+        card = self._screen(
+            "Mi historial de accesos",
+            "Registro de intentos de inicio de sesión asociados a su cuenta",
+            card_width=640,
+        )
+        form = self._form(card)
+
+        table_frame = ttk.Frame(form, style="Form.TFrame")
+        table_frame.grid(row=0, column=0, sticky="nsew", pady=(0, 12))
+        table_frame.columnconfigure(0, weight=1)
+        table_frame.rowconfigure(0, weight=1)
+
+        columns = ("fecha", "evento", "resultado", "mensaje")
+        tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=10)
+        tree.heading("fecha", text="Fecha y hora")
+        tree.heading("evento", text="Evento")
+        tree.heading("resultado", text="Resultado")
+        tree.heading("mensaje", text="Motivo general")
+        tree.column("fecha", width=140, anchor="w", stretch=False)
+        tree.column("evento", width=105, anchor="w", stretch=False)
+        tree.column("resultado", width=90, anchor="center", stretch=False)
+        tree.column("mensaje", width=250, anchor="w", stretch=True)
+        tree.grid(row=0, column=0, sticky="nsew")
+
+        scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        tree.configure(yscrollcommand=scrollbar.set)
+
+        message, label = self._message_label(form, 1, style="Muted.TLabel")
+
+        def safe_value(value: object) -> str:
+            return "" if value is None else str(value)
+
+        def load_history() -> None:
+            for item in tree.get_children():
+                tree.delete(item)
+
+            message.set("")
+            label.configure(style="Muted.TLabel")
+
+            try:
+                rows = self.auth_service.get_access_history(self.current_user)
+            except DATABASE_ERRORS:
+                logging.exception("Error consultando auditoría personal")
+                label.configure(style="Error.TLabel")
+                message.set("No fue posible consultar su historial de accesos en este momento.")
+                return
+            except Exception:
+                logging.exception("Error no controlado consultando auditoría personal")
+                label.configure(style="Error.TLabel")
+                message.set("No fue posible consultar su historial de accesos en este momento.")
+                return
+
+            if not rows:
+                message.set("No existen registros de acceso asociados a su cuenta.")
+                return
+
+            for fecha_evento, evento, resultado, mensaje in rows:
+                tree.insert(
+                    "",
+                    "end",
+                    values=(
+                        safe_value(fecha_evento),
+                        safe_value(evento),
+                        safe_value(resultado),
+                        safe_value(mensaje),
+                    ),
+                )
+
+        actions = self._actions(form, 2)
+        ttk.Button(
+            actions,
+            text="Actualizar",
+            style="Primary.TButton",
+            command=load_history,
+        ).grid(row=0, column=0, sticky="ew", padx=(0, 6))
+        ttk.Button(
+            actions,
+            text="Volver",
+            style="Secondary.TButton",
+            command=self.show_menu,
+        ).grid(row=0, column=1, sticky="ew", padx=(6, 0))
+
+        load_history()

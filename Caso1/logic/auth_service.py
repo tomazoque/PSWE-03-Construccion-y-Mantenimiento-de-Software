@@ -138,6 +138,18 @@ class AuthService:
         )
         return True
 
+    def get_access_history(self, user: User):
+        return self.audit_repository.find_access_history_by_user(user.id_usuario)
+
+    def record_menu_access(self, user: User, option_name: str) -> None:
+        self.audit_repository.record(
+            "MENU",
+            "EXITOSO",
+            email=user.email,
+            user_id=user.id_usuario,
+            message=f"Opción consultada: {option_name}",
+        )
+
 
 def hash_password(password: str, salt: bytes) -> bytes:
     return hashlib.sha256(salt + password.encode("utf-8")).digest()

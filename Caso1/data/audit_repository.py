@@ -24,3 +24,16 @@ class AuditRepository:
             cursor = cn.cursor()
             cursor.execute(sql, user_id, email, event, result, message)
             cn.commit()
+
+    def find_access_history_by_user(self, user_id: int, limit: int = 50):
+        sql = """
+        SELECT TOP (?) fecha_evento, evento, resultado, mensaje
+        FROM dbo.AuditoriaLogin
+        WHERE id_usuario = ?
+          AND evento IN ('LOGIN', 'LOGIN_2FA', 'MENU')
+        ORDER BY fecha_evento DESC
+        """
+        with get_connection(self.db_config) as cn:
+            cursor = cn.cursor()
+            cursor.execute(sql, limit, user_id)
+            return cursor.fetchall()

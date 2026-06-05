@@ -3,7 +3,7 @@ from __future__ import annotations
 from config import DatabaseConfig
 
 try:
-    import pyodbc
+    import pyodbc  # type: ignore[import-not-found]
 except ModuleNotFoundError:
     pyodbc = None
 
@@ -12,7 +12,7 @@ class DatabaseDependencyError(RuntimeError):
     pass
 
 
-DATABASE_ERRORS = (DatabaseDependencyError,)
+DATABASE_ERRORS: tuple[type[BaseException], ...] = (DatabaseDependencyError,)
 if pyodbc is not None:
     DATABASE_ERRORS = (DatabaseDependencyError, pyodbc.Error)
 

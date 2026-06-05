@@ -83,3 +83,21 @@ Eventos registrados:
 - `RECUPERACION_CLAVE`
 - `CAMBIO_CLAVE`
 - `REGISTRO_USUARIO`
+
+
+## Linter y Type Checking
+```
+pip install mypy ruff
+ruff check .
+mypy .
+```
+
+## SonarQube
+
+``
+pip install pysonar
+pysonar \          
+  --sonar-host-url=http://localhost:9000 \
+  --sonar-token=$SONAR_API_KEY \
+  --sonar-project-key=Caso-1
+``

@@ -4,7 +4,7 @@ import logging
 import smtplib
 import tkinter as tk
 from tkinter import messagebox, ttk
-from typing import Callable, Optional
+from typing import Callable, Literal, Optional
 
 from data import DATABASE_ERRORS
 from logic import (
@@ -241,18 +241,25 @@ class App(tk.Tk):
     ) -> ttk.Entry:
         ttk.Label(parent, text=label, style="Field.TLabel").grid(row=row, column=0, sticky="w", pady=(0, 6))
 
-        validate = "key" if validate_digits else "none"
-        validatecommand = None
+        validate: Literal["none", "focus", "focusin", "focusout", "key", "all"]
         if validate_digits:
+            validate = "key"
             validatecommand = (self.register(lambda value: value.isdigit() or value == ""), "%P")
-
-        entry = ttk.Entry(
-            parent,
-            width=width,
-            show=show,
-            validate=validate,
-            validatecommand=validatecommand,
-        )
+            entry = ttk.Entry(
+                parent,
+                width=width,
+                show=show,
+                validate=validate,
+                validatecommand=validatecommand,
+            )
+        else:
+            validate = "none"
+            entry = ttk.Entry(
+                parent,
+                width=width,
+                show=show,
+                validate=validate,
+            )
         entry.grid(row=row + 1, column=0, sticky="ew", pady=(0, bottom_padding))
         return entry
 
@@ -650,6 +657,12 @@ class App(tk.Tk):
             self.auth_service.record_menu_access(self.current_user, title)
             messagebox.showinfo(title, message, parent=self)
 
+        def make_menu_action(title: str, message: str) -> Callable[[], None]:
+            def action() -> None:
+                self.run_action(lambda: open_menu_option(title, message))
+
+            return action
+
         options = ttk.Frame(form, style="Form.TFrame")
         options.grid(row=3, column=0, sticky="ew", pady=(0, 18))
         options.columnconfigure(0, weight=1)
@@ -660,7 +673,7 @@ class App(tk.Tk):
                 options,
                 text=title,
                 style="Secondary.TButton",
-                command=lambda t=title, m=message: self.run_action(lambda: open_menu_option(t, m)),
+                command=make_menu_action(title, message),
             ).grid(
                 row=index // 2,
                 column=index % 2,
@@ -687,6 +700,7 @@ class App(tk.Tk):
         if self.current_user is None:
             self.show_error("La sesión expiró. Inicie sesión nuevamente.", self.show_login)
             return
+        current_user = self.current_user
 
         card = self._screen(
             "Mi historial de accesos",
@@ -729,7 +743,7 @@ class App(tk.Tk):
             label.configure(style="Muted.TLabel")
 
             try:
-                rows = self.auth_service.get_access_history(self.current_user)
+                rows = self.auth_service.get_access_history(current_user)
             except DATABASE_ERRORS:
                 logging.exception("Error consultando auditoría personal")
                 label.configure(style="Error.TLabel")
